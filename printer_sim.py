@@ -224,8 +224,18 @@ def corridor_between_points(board: chess.Board, xy_start, xy_end):
     start = nearest_node_to_xy(xy_start)
     goal  = nearest_node_to_xy(xy_end)
 
+    # It's possible that the nearest node to either endpoint is the center of
+    # an occupied square (for example, when starting outside the board near a
+    # piece).  We still need to allow entering/exiting through that square, so
+    # exempt those centers from the blocked set.
+    exempt = set()
+    if start[0] == "C":
+        exempt.add((start[1], start[2]))
+    if goal[0] == "C":
+        exempt.add((goal[1], goal[2]))
+
     def blocked(r, c):
-        return (r, c) in occ
+        return (r, c) in occ and (r, c) not in exempt
 
     nodes = a_star(start, goal, blocked)
     if not nodes:
